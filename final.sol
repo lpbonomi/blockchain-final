@@ -17,7 +17,7 @@ contract QuadraticVoting{
     uint private total_budget;
     // Proposal -> User -> votes
     mapping(address => uint)[] votes_per_user_per_proposal;
-    address[] voters_of_proposals;
+    address[][] voters_of_proposals;
 
 
     struct Proposal {
@@ -101,10 +101,10 @@ contract QuadraticVoting{
         
         address[] storage voters_of_proposal = voters_of_proposals[proposal_id];
 
-        for(uint i = 0; i < voters_of_proposal.length; i++){
-            uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
-            votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]] = 0;
-            tokens_of_voters[voters_of_proposal[i]] += votes**2;
+        for(uint i = 0; i < voters_of_proposals.length; i++){
+            uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposals[proposal_id][i]];
+            votes_per_user_per_proposal[proposal_id][voters_of_proposals[proposal_id][i]] = 0;
+            tokens_of_voters[voters_of_proposals[proposal_id][i]] += votes**2;
         }
     }
 
@@ -203,10 +203,7 @@ contract QuadraticVoting{
         return (proposal.title, proposal.description, proposal.budget);
     }
 
-    function stake(uint proposalId, uint nrVotes) public participantRegistered {
-        require(votingOpen == true, "The voting has not started yet!");        
-        
-
+    function stake(uint proposalId, uint nrVotes) public participantRegistered votingOpen{
         Proposal storage proposal = proposals[proposalId];
         uint previous_votes = votes_per_user_per_proposal[proposalId][msg.sender];
         uint nrTokens = (previous_votes + nrVotes)**2 - previous_votes;
@@ -231,14 +228,14 @@ contract QuadraticVoting{
         require(votes_per_user_per_proposal[proposal_id][msg.sender] >= amount_of_votes, "User has not casted that much votes.");
 
         uint votes = votes_per_user_per_proposal[proposal_id][msg.sender];
-        votes_per_user_per_proposal[proposal_id][msg.sender] =- amount_of_votes;
+        votes_per_user_per_proposal[proposal_id][msg.sender] = amount_of_votes;
         tokens_of_voters[msg.sender] += ((votes**2) - ((votes - amount_of_votes)**2)) ;
     }
 
 // TODO
 // Recuerda que debe actualizarse el presupuesto disponible para propuestas (y no olvides a˜nadir al presupuesto el
 //  importe recibido de los tokens de votos de la propuesta que se acaba de aprobar).
-
+    
     function _checkAndExecuteProposal(uint proposal_id) internal {
         Proposal storage proposal = proposals[proposal_id];
         require(proposal.budget <= total_budget + (proposal.votes * tokenPrice), "Budget + money collected is not enough for proposal.");
@@ -311,3 +308,21 @@ contract VotingToken is ERC20
     }
     
 }
+
+interface ExecutableProposal 
+{
+    function executeProposal(uint proposalId) external payable;
+}
+
+contract Payee is ExecutableProposal
+{
+    
+    event Pay(address sender, uint proposalId, uint value);
+    
+    function executeProposal(uint proposalId) override external payable
+    {
+        emit Pay(msg.sender, proposalId, msg.value);
+    }
+}
+
+
