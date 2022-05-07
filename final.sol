@@ -233,18 +233,9 @@ contract QuadraticVoting {
         tokens_of_voters[msg.sender] += ((votes**2) - ((votes - amount_of_votes)**2)) ;
     }
 
-
-// _checkAndExecuteProposal: internal function that checks if the conditions for executing a proposal hold and, 
-// if they hold, executes it using the function executeProposal from the contract provided when this proposal was
-//  created. This call to the external contract must transfer the budgeted amount for executing the proposal. 
-//  Remember that the total amount available for proposals must be updated (and do not forget the amount received for 
-//  the tokens used for voting the proposal that is to be executed). Besides, the tokens related to votes for this 
-//  proposal must be removed, as its execution consumes them.
-
-// When calling to executeProposal in the external contract, the maximum amount of gas must be limited to prevent 
-// the proposal contract from consuming all the gas in the transaction. This call must consume at most 100000 gas.
-
-
+// TODO
+// Recuerda que debe actualizarse el presupuesto disponible para propuestas (y no olvides a˜nadir al presupuesto el
+//  importe recibido de los tokens de votos de la propuesta que se acaba de aprobar).
 
     function _checkAndExecuteProposal(uint proposal_id) internal {
         Proposal storage proposal = proposals[proposal_id];
@@ -253,11 +244,18 @@ contract QuadraticVoting {
         // TODO question: numProposals includes cancelled proposals?
         // We multiply by 10 and by total_budget to avoid decimals
         uint threshold = (2 + (10 * proposal.budget)) * total_participants + (total_proposals * 10 * total_budget);
-        require(proposal.votes > threshold, "Votes don't exceed the threshold");
-        // reduce total_budget
-            //Perform checks
-            //Execute
-            // TODO etc
+        require(proposal.votes * 10 * total_budget > threshold, "Votes don't exceed the threshold");
+
+        proposal.executable_proposal_address.executeProposal{value: proposal.budget, gas: 100000}();
+
+        proposal.is_approved = true;
+
+        address[] voters_of_proposal = voters_of_proposals[proposal.address];
+        
+        for(uint i = 0; i < voters_of_proposal.length; i++){
+            uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
+            VotingToken.burn(voters_of_proposal[i], votes**2);
+        }
     }
 
     function closeVoting() external onlyOwner{
