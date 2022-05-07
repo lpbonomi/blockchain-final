@@ -16,8 +16,8 @@ contract QuadraticVoting{
     uint private maxUsedTokens;
     uint private total_budget;
     // Proposal -> User -> votes
-    mapping(address => mapping(address => uint)) votes_per_user_per_proposal;
-    mapping(address => address[]) voters_of_proposals;
+    mapping(address => uint)[] votes_per_user_per_proposal;
+    address[] voters_of_proposals;
 
 
     struct Proposal {
@@ -99,11 +99,11 @@ contract QuadraticVoting{
 
         proposal.is_cancelled = true;
         
-        address[] storage voters_of_proposal = voters_of_proposals[proposal.address];
+        address[] storage voters_of_proposal = voters_of_proposals[proposal_id];
 
         for(uint i = 0; i < voters_of_proposal.length; i++){
-            uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
-            votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]] = 0;
+            uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
+            votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]] = 0;
             tokens_of_voters[voters_of_proposal[i]] += votes**2;
         }
     }
@@ -208,7 +208,7 @@ contract QuadraticVoting{
         
 
         Proposal storage proposal = proposals[proposalId];
-        uint previous_votes = votes_per_user_per_proposal[proposal.address][msg.sender];
+        uint previous_votes = votes_per_user_per_proposal[proposalId][msg.sender];
         uint nrTokens = (previous_votes + nrVotes)**2 - previous_votes;
 
         require(tokens_of_voters[msg.sender]>=nrTokens, "Not enough tokens!");
@@ -216,11 +216,11 @@ contract QuadraticVoting{
         tokenLogic.transferFrom(msg.sender, address(this), nrTokens);
         tokens_of_voters[msg.sender] -= nrTokens;
 
-        votes_per_user_per_proposal[proposal.address][msg.sender] += nrVotes;
+        votes_per_user_per_proposal[proposalId][msg.sender] += nrVotes;
         proposal.votes += nrVotes;
 
         if(previous_votes == 0){
-            voters_of_proposals[proposal.address].push(msg.sender);
+            voters_of_proposals[proposalId].push(msg.sender);
         }
         _checkAndExecuteProposal(proposalId);  
     }
@@ -228,10 +228,10 @@ contract QuadraticVoting{
     function withdrawFromProposal(uint amount_of_votes, uint proposal_id) external{
         Proposal storage proposal = proposals[proposal_id];
         require(!proposal.is_approved, "The proposal has already been approved");
-        require(votes_per_user_per_proposal[proposal.address][msg.sender] >= amount_of_votes, "User has not casted that much votes.");
+        require(votes_per_user_per_proposal[proposal_id][msg.sender] >= amount_of_votes, "User has not casted that much votes.");
 
-        uint votes = votes_per_user_per_proposal[proposal.address][msg.sender];
-        votes_per_user_per_proposal[proposal.address][msg.sender] =- amount_of_votes;
+        uint votes = votes_per_user_per_proposal[proposal_id][msg.sender];
+        votes_per_user_per_proposal[proposal_id][msg.sender] =- amount_of_votes;
         tokens_of_voters[msg.sender] += ((votes**2) - ((votes - amount_of_votes)**2)) ;
     }
 
@@ -252,26 +252,26 @@ contract QuadraticVoting{
 
         proposal.is_approved = true;
 
-        address[] storage voters_of_proposal = voters_of_proposals[proposal.address];
+        address[] storage voters_of_proposal = voters_of_proposals[proposal_id];
         
         for(uint i = 0; i < voters_of_proposal.length; i++){
-            uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
+            uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
             VotingToken.burn(voters_of_proposal[i], votes**2);
         }
     }
 
     function closeVoting() external onlyOwner{
         is_open = false;
-        for(uint i=1; i<total_proposals+1; i++)
+        for(uint i = 0 ; i < proposals.length; i++)
         {
             if(proposals[i].is_approved == false) //if the proposal is still not approved
             {
                for(uint j=0; j<voters_of_proposals[i].length; j++)
                 {
-                    if(votes_per_user_per_proposal[proposals[i]][voters_of_proposals[j]]>0) //check if the participant voted in this proposal
+                    if(votes_per_user_per_proposal[i][voters_of_proposals[j]]>0) //check if the participant voted in this proposal
                     {
-                        uint aux = votes_per_user_per_proposal[proposals[i]][voters_of_proposals[i]];
-                        votes_per_user_per_proposal[proposals[i]][voters_of_proposals[j]] = 0; //set the number of tokens to 0 
+                        uint aux = votes_per_user_per_proposal[i][voters_of_proposals[i]];
+                        votes_per_user_per_proposal[i][voters_of_proposals[j]] = 0; //set the number of tokens to 0 
                         address payable addr = payable(voters_of_proposals[i][j]); //convert the address to payable to be able to do the transfer
                         addr.transfer(aux**2*tokenPrice); //send him the value in money of his tokens
                         delete proposals[i];
