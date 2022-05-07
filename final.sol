@@ -2,7 +2,9 @@
 
 pragma solidity ^0.8.13;
 
-contract QuadraticVoting {
+import "./openzeppelin-contracts-master/contracts/token/ERC20/ERC20.sol";
+
+contract QuadraticVoting{
     address owner;
     bool is_open;
     mapping (address => uint) tokens_of_voters;
@@ -77,7 +79,7 @@ contract QuadraticVoting {
     function addProposal(string calldata title, string calldata description, uint budget, address executable_proposal_address) external votingOpen participantRegistered returns (uint proposal_id  ){
         require(bytes(title).length > 0, "Title can't be empty");
         require(bytes(description).length > 0, "Title can't be empty");
-        require(isContract(), "The address received is not a valid contract address");
+        require(isContract(executable_proposal_address), "The address received is not a valid contract address");
 
         proposals.push(Proposal(msg.sender, title, description, 0, budget, executable_proposal_address, false, false));
         total_proposals++;
@@ -93,14 +95,14 @@ contract QuadraticVoting {
     }
     
     function cancelProposal(uint proposal_id) external votingOpen onlyProposalOwner(proposal_id){
-        Proposal proposal = proposals[proposal_id];
+        Proposal storage proposal = proposals[proposal_id];
 
         require(!proposal.is_approved, "Approved proposals can't be cancelled.");
         require(!proposal.is_cancelled, "Proposal has already been cancelled.");
 
         proposal.is_cancelled = true;
         
-        address[] voters_of_proposal = voters_of_proposals[proposal.address];
+        address[] storage voters_of_proposal = voters_of_proposals[proposal.address];
 
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
@@ -253,7 +255,7 @@ contract QuadraticVoting {
 
         proposal.is_approved = true;
 
-        address[] voters_of_proposal = voters_of_proposals[proposal.address];
+        address[] storage voters_of_proposal = voters_of_proposals[proposal.address];
         
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
