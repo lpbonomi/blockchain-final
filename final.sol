@@ -8,8 +8,7 @@ contract QuadraticVoting{
     address owner;
     bool is_open;
     mapping (address => uint) tokens_of_voters;
-    mapping (uint => Proposal) proposals;
-    uint total_proposals;
+    Proposal[] proposals;
     VotingToken private tokenLogic;
     mapping (address => bool) registeredParticipants; 
     uint total_participants;
@@ -41,7 +40,6 @@ contract QuadraticVoting{
         tokenLogic = new VotingToken("Mark", "RM", tokenCap);
         is_open = false;
         total_participants = 0;
-        total_proposals = 0;
     }
 
     modifier onlyOwner {
@@ -82,8 +80,7 @@ contract QuadraticVoting{
         require(isContract(executable_proposal_address), "The address received is not a valid contract address");
 
         proposals.push(Proposal(msg.sender, title, description, 0, budget, executable_proposal_address, false, false));
-        total_proposals++;
-        return total_proposals - 1;
+        return proposals.length - 1;
     }
 
     function isContract (address a) private returns (bool){
@@ -248,7 +245,7 @@ contract QuadraticVoting{
 
         // TODO question: numProposals includes cancelled proposals?
         // We multiply by 10 and by total_budget to avoid decimals
-        uint threshold = (2 + (10 * proposal.budget)) * total_participants + (total_proposals * 10 * total_budget);
+        uint threshold = (2 + (10 * proposal.budget)) * total_participants + (proposals.length * 10 * total_budget);
         require(proposal.votes * 10 * total_budget > threshold, "Votes don't exceed the threshold");
 
         proposal.executable_proposal_address.executeProposal{value: proposal.budget, gas: 100000}();
