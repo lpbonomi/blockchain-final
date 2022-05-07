@@ -32,7 +32,7 @@ contract QuadraticVoting{
     }
 
 
-    constructor(uint tokenPrice_, uint maxUsedTokens_, uint tokenCap){
+    constructor(uint tokenPrice_, uint maxUsedTokens_, uint tokenCap) payable{
         owner = msg.sender;
         tokenPrice = tokenPrice_;
         maxUsedTokens = maxUsedTokens_;
@@ -83,7 +83,7 @@ contract QuadraticVoting{
         return proposals.length - 1;
     }
 
-    function isContract (address a) private returns (bool){
+    function isContract (address a) private view returns (bool){
         uint size;
         assembly{
             size := extcodesize(a)
@@ -102,9 +102,9 @@ contract QuadraticVoting{
         address[] storage voters_of_proposal = voters_of_proposals[proposal_id];
 
         for(uint i = 0; i < voters_of_proposals.length; i++){
-            uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposals[proposal_id][i]];
-            votes_per_user_per_proposal[proposal_id][voters_of_proposals[proposal_id][i]] = 0;
-            tokens_of_voters[voters_of_proposals[proposal_id][i]] += votes**2;
+            uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
+            votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]] = 0;
+            tokens_of_voters[voters_of_proposal[i]] += votes**2;
         }
     }
 
@@ -245,7 +245,8 @@ contract QuadraticVoting{
         uint threshold = (2 + (10 * proposal.budget)) * total_participants + (proposals.length * 10 * total_budget);
         require(proposal.votes * 10 * total_budget > threshold, "Votes don't exceed the threshold");
 
-        proposal.executable_proposal_address.executeProposal{value: proposal.budget, gas: 100000}();
+        IExecutableProposal executable_proposal = IExecutableProposal(proposal.executable_proposal_address);
+        executable_proposal.executeProposal{value: proposal.budget, gas: 100000}(proposal_id);
 
         proposal.is_approved = true;
 
@@ -253,7 +254,7 @@ contract QuadraticVoting{
         
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
-            VotingToken.burn(voters_of_proposal[i], votes**2);
+            tokenLogic.burn(voters_of_proposal[i], votes**2);
         }
     }
 
@@ -265,10 +266,10 @@ contract QuadraticVoting{
             {
                for(uint j=0; j<voters_of_proposals[i].length; j++)
                 {
-                    if(votes_per_user_per_proposal[i][voters_of_proposals[j]]>0) //check if the participant voted in this proposal
+                    if(votes_per_user_per_proposal[i][voters_of_proposals[i][j]]>0) //check if the participant voted in this proposal
                     {
-                        uint aux = votes_per_user_per_proposal[i][voters_of_proposals[i]];
-                        votes_per_user_per_proposal[i][voters_of_proposals[j]] = 0; //set the number of tokens to 0 
+                        uint aux = votes_per_user_per_proposal[i][voters_of_proposals[i][j]];
+                        votes_per_user_per_proposal[i][voters_of_proposals[i][j]] = 0; //set the number of tokens to 0 
                         address payable addr = payable(voters_of_proposals[i][j]); //convert the address to payable to be able to do the transfer
                         addr.transfer(aux**2*tokenPrice); //send him the value in money of his tokens
                         delete proposals[i];
@@ -309,12 +310,12 @@ contract VotingToken is ERC20
     
 }
 
-interface ExecutableProposal 
+interface IExecutableProposal 
 {
     function executeProposal(uint proposalId) external payable;
 }
 
-contract testContract is ExecutableProposal
+contract testContract is IExecutableProposal
 {
     
     event Pay(address sender, uint proposalId, uint value);
