@@ -95,12 +95,12 @@ contract QuadraticVoting {
 
         proposal.is_cancelled = true;
         
-        voters_of_proposal = voters_of_proposals[proposal.address];
+        address[] voters_of_proposal = voters_of_proposals[proposal.address];
 
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
             votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]] = 0;
-            tokens_of_voters[voters_of_proposal[i]] =+ votes**2;
+            tokens_of_voters[voters_of_proposal[i]] += votes**2;
         }
     }
 
@@ -137,7 +137,7 @@ contract QuadraticVoting {
             }
         }
 
-        uint[] memory pending_proposals = new uint[](number_of_pending_proposals);
+        pending_proposals = new uint[](number_of_pending_proposals);
         uint j = 0;
         for(uint i = 0; i < number_of_pending_proposals; j++){
             Proposal storage proposal = proposals[i];
@@ -159,7 +159,7 @@ contract QuadraticVoting {
             }
         }
 
-        uint[] memory approved_proposals = new uint[](number_of_approved_proposals);
+        approved_proposals = new uint[](number_of_approved_proposals);
         uint j = 0;
         for(uint i = 0; i < number_of_approved_proposals; j++){
             Proposal storage proposal = proposals[i];
@@ -181,7 +181,7 @@ contract QuadraticVoting {
             }
         }
 
-        uint[] memory signaling_proposals = new uint[](number_of_signaling_proposals);
+        signaling_proposals = new uint[](number_of_signaling_proposals);
         uint j = 0;
         for(uint i = 0; i < number_of_signaling_proposals; j++){
             Proposal storage proposal = proposals[i];
@@ -218,22 +218,14 @@ contract QuadraticVoting {
         _checkAndExecuteProposal(proposalId);  
     }
 
-
-this function removes (if possible) that amount of votes previously
-     casted by the participant invoking this function. A participant can only remove votes that he has previously casted for that proposal, 
-     and the proposal cannot have been approved yet. Remember that this function must return the tokens used for casting those votes back to
-      the participant (for instance, if the participant had casted 4 votes for a proposal and withdraws 2 of them, 12 tokens must be returned
-       back to the participant).
-
-
     function withdrawFromProposal(uint amount_of_votes, uint proposal_id) external{
         Proposal storage proposal = proposals[proposal_id];
         require(!proposal.is_approved, "The proposal has already been approved");
         require(votes_per_user_per_proposal[proposal.address][msg.sender] >= amount_of_votes, "User has not casted that much votes.");
 
-        uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
-        votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]] =- amount_of_votes;
-        tokens_of_voters[voters_of_proposal[i]] =+ ((votes**2) - ((votes - amount_of_votes)**2)) ;
+        uint votes = votes_per_user_per_proposal[proposal.address][msg.sender];
+        votes_per_user_per_proposal[proposal.address][msg.sender] =- amount_of_votes;
+        tokens_of_voters[msg.sender] += ((votes**2) - ((votes - amount_of_votes)**2)) ;
     }
 
 
