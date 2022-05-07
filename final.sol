@@ -314,7 +314,7 @@ interface ExecutableProposal
     function executeProposal(uint proposalId) external payable;
 }
 
-contract Payee is ExecutableProposal
+contract testContract is ExecutableProposal
 {
     
     event Pay(address sender, uint proposalId, uint value);
