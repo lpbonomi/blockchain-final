@@ -206,20 +206,23 @@ contract QuadraticVoting {
 
     function stake(uint proposalId, uint nrVotes) public participantRegistered {
         require(votingOpen == true, "The voting has not started yet!");        
-        uint nrTokens;
-        if(proposals[proposalId].votes_per_user[msg.sender]>0) {
-            uint currentVotes = proposals[proposalId].votes_per_user[msg.sender];
-            nrTokens = (currentVotes+nrVotes)**2 - currentVotes;
-        } else {
-            nrTokens = nrVotes**2;
-        }
+        
+
+        Proposal storage proposal = proposals[proposalId];
+        uint previous_votes = votes_per_user_per_proposal[proposal.address][msg.sender];
+        uint nrTokens = (previous_votes + nrVotes)**2 - previous_votes;
 
         require(tokens_of_voters[msg.sender]>=nrTokens, "Not enough tokens!");
         require(tokenLogic.allowance(msg.sender, address(this))>=nrTokens, "Use of tokens needs allowance!");
         tokenLogic.transferFrom(msg.sender, address(this), nrTokens);
         tokens_of_voters[msg.sender] -= nrTokens;
-        proposals[proposalId].votes_per_user[msg.sender] += nrVotes;
-        proposals[proposalId].votes += nrVotes;
+
+        votes_per_user_per_proposal[proposal.address][msg.sender] += nrVotes;
+        proposal.votes += nrVotes;
+
+        if(previous_votes == 0){
+            voters_of_proposals[proposal.address].push(msg.sender);
+        }
         _checkAndExecuteProposal(proposalId);  
     }
 
