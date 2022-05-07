@@ -263,17 +263,23 @@ contract QuadraticVoting {
 
     function closeVoting() external onlyOwner{
         is_open = false;
-
-        //         • The proposals that have not been approved must be dismissed and the tokens used for voting them must be 
-        // returned to their owners.
-        // • The signaling proposals must be executed (no Ether is transferred in this case) and the tokens used for voting 
-        // them must be returned to their owners.
-        // • The remaining voting budget not spent on any proposal must be transferred to the owner of the voting contract.
-
-
-        // When a voting process is closed, new proposals and votes must be rejected and the QuadraticVoting contract must
-        //  be set to a state that allows opening a new voting process.
-        // This function might consume a lot of gas, take this into account when programming and testing it.
+        for(uint i=1; i<total_proposals+1; i++)
+        {
+            if(proposals[i].is_approved == false) //if the proposal is still not approved
+            {
+               for(uint j=0; j<voters_of_proposals[i].length; j++)
+                {
+                    if(votes_per_user_per_proposal[proposals[i]][voters_of_proposals[j]]>0) //check if the participant voted in this proposal
+                    {
+                        uint aux = votes_per_user_per_proposal[proposals[i]][voters_of_proposals[i]];
+                        votes_per_user_per_proposal[proposals[i]][voters_of_proposals[j]] = 0; //set the number of tokens to 0 
+                        address payable addr = payable(voters_of_proposals[i][j]); //convert the address to payable to be able to do the transfer
+                        addr.transfer(aux**2*tokenPrice); //send him the value in money of his tokens
+                        delete proposals[i];
+                    }
+                }
+            }
+        }
     }
 
     function sqrt(uint x) internal pure returns (uint y) 
