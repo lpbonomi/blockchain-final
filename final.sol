@@ -13,6 +13,10 @@ contract QuadraticVoting {
     uint private immutable tokenPrice;
     uint private maxUsedTokens;
     uint private totalbudget;
+    // Proposal -> User -> votes
+    mapping(address => mapping(address => uint)) votes_per_user_per_proposal;
+    mapping(address => address[]) voters_of_proposals;
+
 
     struct Proposal {
         address owner;
@@ -23,7 +27,6 @@ contract QuadraticVoting {
         address executable_proposal_address;
         bool is_approved;
         bool is_cancelled;
-        mapping(address => uint) votes_per_user;
     }
 
 
@@ -61,32 +64,44 @@ contract QuadraticVoting {
         initial_budget = msg.value;
     }
 
-
-    // Pregunta como se agrega plata ??
     function addParticipant() external payable {
-        require(tokens_of_voters[msg.sender] == 0, "Participant already registered.");
-        //TODO 
-        //  Participants must transfer Ether when registering to buy tokens (at least one token)
-        //   that will be used for casting their votes.
-
-        //TODO buy tokens with msg.value
+        require(registeredParticipants[msg.sender] == false, "Participant already registered.");
+        buyTokens();
+        registeredParticipants[msg.sender] = true;
     }
-    /*
-    function addProposal(string memory title, string memory description, uint budget, address executable_proposal_address) external votingOpen returns (uint proposal_id  ){
+    
+    function addProposal(string calldata title, string calldata description, uint budget, address executable_proposal_address) external votingOpen participantRegistered returns (uint proposal_id  ){
         require(bytes(title).length > 0, "Title can't be empty");
         require(bytes(description).length > 0, "Title can't be empty");
-        //TODO verificar address del contrato existe?
-        //TODO require onlyParticipant
-        proposals.push(Proposal(msg.sender, title, description, budget, executable_proposal_address, false, false, 
-        // TODO como hacer con el mapping
-        ));
+        require(isContract(), "The address received is not a valid contract address");
+
+        proposals.push(Proposal(msg.sender, title, description, 0, budget, executable_proposal_address, false, false));
         return proposals.length - 1;
     }
-    */
+
+    function isContract (address a) private returns (bool){
+        uint size;
+        assembly{
+            size := extcodesize(a)
+        }
+        return (size != 0);
+    }
+    
     function cancelProposal(uint proposal_id) external votingOpen onlyProposalOwner(proposal_id){
-            require(!proposals[proposal_id].is_approved, "Approved proposals can't be cancelled.");
-            require(!proposals[proposal_id].is_cancelled, "Proposal has been cancelled already.");
-            //TODO return tokens
+        Proposal proposal = proposals[proposal_id];
+
+        require(!proposal.is_approved, "Approved proposals can't be cancelled.");
+        require(!proposal.is_cancelled, "Proposal has already been cancelled.");
+
+        proposal.is_cancelled = true;
+        
+        voters_of_proposal = voters_of_proposals[proposal.address];
+
+        for(uint i = 0; i < voters_of_proposal.length; i++){
+            uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
+            votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]] = 0;
+            tokens_of_voters[voters_of_proposal[i]] =+ votes**2;
+        }
     }
 
     function buyTokens() participantRegistered public payable
@@ -203,12 +218,33 @@ contract QuadraticVoting {
         _checkAndExecuteProposal(proposalId);  
     }
 
+
+this function removes (if possible) that amount of votes previously
+     casted by the participant invoking this function. A participant can only remove votes that he has previously casted for that proposal, 
+     and the proposal cannot have been approved yet. Remember that this function must return the tokens used for casting those votes back to
+      the participant (for instance, if the participant had casted 4 votes for a proposal and withdraws 2 of them, 12 tokens must be returned
+       back to the participant).
+
+
     function withdrawFromProposal(uint amount_of_votes, uint proposal_id) external{
         Proposal storage proposal = proposals[proposal_id];
         require(!proposal.is_approved, "The proposal has already been approved");
-            // TODO require tokens match votes available
-            //TODO return tokens to participant
+        require(votes_per_user_per_proposal[proposal.address][msg.sender] >= amount_of_votes, "User has not casted that much votes.");
+
+        uint votes = votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]];
+        votes_per_user_per_proposal[proposal.address][voters_of_proposal[i]] =- amount_of_votes;
+        tokens_of_voters[voters_of_proposal[i]] =+ ((votes**2) - ((votes - amount_of_votes)**2)) ;
     }
+
+
+// _checkAndExecuteProposal: internal function that checks if the conditions for execu- ting a proposal hold and, if they hold, executes it using 
+// the function executeProposal from the contract provided when this proposal was created. This call to the external contract must transfer the
+//  budgeted amount for executing the proposal. Remember that the total amount available for proposals must be updated (and do not forget the
+//   amount received for the tokens used for voting the proposal that is to be executed). Besides, the tokens related to votes for this proposal
+//    must be removed, as its execution consumes them.
+
+// When calling to executeProposal in the external contract, the maximum amount of gas must be limited to prevent the proposal contract from
+//  consuming all the gas in the transaction. This call must consume at most 100000 gas.
 
     // funciton _checkAndcheckAndExecuteProposal() internal {
     //         //Perform checks
