@@ -5,14 +5,15 @@ pragma solidity ^0.8.13;
 contract QuadraticVoting {
     address owner;
     bool is_open;
-    uint initial_budget;
     mapping (address => uint) tokens_of_voters;
     mapping (uint => Proposal) proposals;
+    uint total_proposals;
     VotingToken private tokenLogic;
     mapping (address => bool) registeredParticipants; 
+    uint total_participants;
     uint private immutable tokenPrice;
     uint private maxUsedTokens;
-    uint private totalbudget;
+    uint private total_budget;
     // Proposal -> User -> votes
     mapping(address => mapping(address => uint)) votes_per_user_per_proposal;
     mapping(address => address[]) voters_of_proposals;
@@ -34,9 +35,11 @@ contract QuadraticVoting {
         owner = msg.sender;
         tokenPrice = tokenPrice_;
         maxUsedTokens = maxUsedTokens_;
-        totalbudget = msg.value;
+        total_budget = msg.value;
         tokenLogic = new VotingToken("Mark", "RM", tokenCap);
         is_open = false;
+        total_participants = 0;
+        total_proposals = 0;
     }
 
     modifier onlyOwner {
@@ -61,13 +64,14 @@ contract QuadraticVoting {
 
     function openVoting() external payable onlyOwner{
         is_open = true;
-        initial_budget = msg.value;
+        total_budget = msg.value;
     }
 
     function addParticipant() external payable {
         require(registeredParticipants[msg.sender] == false, "Participant already registered.");
         buyTokens();
         registeredParticipants[msg.sender] = true;
+        total_participants++;
     }
     
     function addProposal(string calldata title, string calldata description, uint budget, address executable_proposal_address) external votingOpen participantRegistered returns (uint proposal_id  ){
@@ -76,7 +80,8 @@ contract QuadraticVoting {
         require(isContract(), "The address received is not a valid contract address");
 
         proposals.push(Proposal(msg.sender, title, description, 0, budget, executable_proposal_address, false, false));
-        return proposals.length - 1;
+        total_proposals++;
+        return total_proposals - 1;
     }
 
     function isContract (address a) private returns (bool){
@@ -229,20 +234,31 @@ contract QuadraticVoting {
     }
 
 
-// _checkAndExecuteProposal: internal function that checks if the conditions for execu- ting a proposal hold and, if they hold, executes it using 
-// the function executeProposal from the contract provided when this proposal was created. This call to the external contract must transfer the
-//  budgeted amount for executing the proposal. Remember that the total amount available for proposals must be updated (and do not forget the
-//   amount received for the tokens used for voting the proposal that is to be executed). Besides, the tokens related to votes for this proposal
-//    must be removed, as its execution consumes them.
+// _checkAndExecuteProposal: internal function that checks if the conditions for executing a proposal hold and, 
+// if they hold, executes it using the function executeProposal from the contract provided when this proposal was
+//  created. This call to the external contract must transfer the budgeted amount for executing the proposal. 
+//  Remember that the total amount available for proposals must be updated (and do not forget the amount received for 
+//  the tokens used for voting the proposal that is to be executed). Besides, the tokens related to votes for this 
+//  proposal must be removed, as its execution consumes them.
 
-// When calling to executeProposal in the external contract, the maximum amount of gas must be limited to prevent the proposal contract from
-//  consuming all the gas in the transaction. This call must consume at most 100000 gas.
+// When calling to executeProposal in the external contract, the maximum amount of gas must be limited to prevent 
+// the proposal contract from consuming all the gas in the transaction. This call must consume at most 100000 gas.
 
-    // funciton _checkAndcheckAndExecuteProposal() internal {
-    //         //Perform checks
-    //         //Execute
-    //         // TODO etc
-    // }
+
+
+    function _checkAndExecuteProposal(uint proposal_id) internal {
+        Proposal storage proposal = proposals[proposal_id];
+        require(proposal.budget <= total_budget + (proposal.votes * tokenPrice), "Budget + money collected is not enough for proposal.");
+
+        // TODO question: numProposals includes cancelled proposals?
+        // We multiply by 10 and by total_budget to avoid decimals
+        uint threshold = (2 + (10 * proposal.budget)) * total_participants + (total_proposals * 10 * total_budget);
+        require(proposal.votes > threshold, "Votes don't exceed the threshold");
+        // reduce total_budget
+            //Perform checks
+            //Execute
+            // TODO etc
+    }
 
     function closeVoting() external onlyOwner{
         is_open = false;
