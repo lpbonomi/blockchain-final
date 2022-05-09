@@ -131,4 +131,20 @@ contract testSuite {
             Assert.equal(reason, "Proposal has already been cancelled.", "");
         } 
     }
+
+    function checkGetProposals() public {
+        testVote.openVoting();
+        testVote.addParticipant();
+
+        Assert.equal(testVote.getPendingProposals().length, 0, "The number of proposals should be 0.");
+        Assert.equal(testVote.getApprovedProposals().length, 0, "The number of proposals should be 0.");
+
+        testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(this));
+
+        Assert.equal(testVote.getPendingProposals().length, 1, "The number of proposals should be 1.");
+    }
+
+    
+    
+
 }

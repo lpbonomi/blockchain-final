@@ -138,7 +138,7 @@ contract QuadraticVoting{
         uint number_of_pending_proposals = 0;
         for(uint i = 0; i < proposals.length; i++){
             Proposal storage proposal = proposals[i];
-            if(!proposal.is_cancelled && !proposal.is_approved){
+            if(!proposal.is_cancelled && !proposal.is_approved && proposal.budget != 0){
                 number_of_pending_proposals++;
             }
         }
@@ -160,7 +160,7 @@ contract QuadraticVoting{
         uint number_of_approved_proposals = 0;
         for(uint i = 0; i < proposals.length; i++){
             Proposal storage proposal = proposals[i];
-            if(proposal.is_approved){
+            if(proposal.is_approved && proposal.budget != 0){
                 number_of_approved_proposals++;
             }
         }
