@@ -47,11 +47,11 @@
 	},
 	"sources": {
 		"blockchain-final/final.sol": {
-			"keccak256": "0x348572cea78ab532b14c33264832603c5f69e6df3b511d11e74c871e4f58d64b",
+			"keccak256": "0xec4c568fbf8fc13d6074f0013c10a490d162be3528b64fc3c88ea195ca05fee2",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://fe08d9025b2202062f8c3f6dcef28124da8e4f9dc24390014e0d77ed11f6aabd",
-				"dweb:/ipfs/QmYfec2SB9fqB7mWqvic75erzt89DPn1rgPXdzQrW1LqgU"
+				"bzz-raw://116d8aa3a487e35faa5e3b5a1f6ca107bdd833140b386518815d4ae7659bd0ff",
+				"dweb:/ipfs/QmWeRJJhSJe2w9fk4JE3sPNjPQKxJUMon7RyxavDf9Rs7B"
 			]
 		},
 		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/ERC20.sol": {

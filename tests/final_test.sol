@@ -25,13 +25,39 @@ contract testSuite {
         testVote = new QuadraticVoting(1000, 10);
     }
 
+
+    
     // #sender: account-1
-    // #value: 10000
-    // function checkBuyTokens() public payable {
-    //     testVote = new QuadraticVoting(1000, 10);
-    //     addParticipant();
-    //     Assert.equal(msg.value, 0, "kein Plan");
-    // }
+    // #value: 0
+    function checkBuyTooLittleTokens() public payable {
+        testVote.addParticipant();
+        try testVote.buyTokens() {
+            Assert.ok(false, "Call should fail");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "You have to buy at least one token!", "");
+        }    
+    }
+
+    // #sender: account-1
+    // #value: 1000
+    function checkBuyTokensUnregistered() public payable {
+        try testVote.buyTokens() {
+            Assert.ok(false, "Call should fail");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "Address not registered!", "");
+        }    
+    }
+
+    /// #sender: account-1
+    /// #value: 3001
+    function checkBuyFractionalTokens() public payable {
+        testVote.addParticipant();
+        try testVote.buyTokens() {
+            Assert.ok(false, "Call should fail");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "Watch the token price, only whole tokens can be bought!", "");
+        }  
+    }
 
     // #sender: account-1
     // #value: 10000
