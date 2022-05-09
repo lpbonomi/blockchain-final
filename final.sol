@@ -63,6 +63,7 @@ contract QuadraticVoting{
     }
 
     function openVoting() external payable onlyOwner{
+        require(!is_open, "Voting is already open.");
         is_open = true;
         total_budget = msg.value;
     }

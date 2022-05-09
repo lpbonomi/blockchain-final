@@ -19,44 +19,41 @@ contract testSuite {
     address acc1 = TestsAccounts.getAccount(1);
     address acc2 = TestsAccounts.getAccount(2);
     address acc3 = TestsAccounts.getAccount(3);
-    address recipient = TestsAccounts.getAccount(4); //recipient
-    /// 'beforeAll' runs before all other tests
-    /// More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'
-    function beforeAll() public {        
-        Assert.equal(uint(1), uint(1), "1 should be equal to 1");
-    }
+    address recipient = TestsAccounts.getAccount(4);
 
-    function checkSuccess() public {
-        // Use 'Assert' methods: https://remix-ide.readthedocs.io/en/latest/assert_library.html
-        Assert.ok(2 == 2, 'should be true');
-        Assert.greaterThan(uint(2), uint(1), "2 should be greater than to 1");
-        Assert.lesserThan(uint(2), uint(3), "2 should be lesser than to 3");
-    }
-
-    function checkSuccess2() public pure returns (bool) {
-        // Use the return value (true or false) to test the contract
-        return true;
-    }
-    
-    function checkFailure() public {
-        Assert.notEqual(uint(1), uint(1), "1 should not be equal to 1");
-    }
-
-    /// Custom Transaction Context: https://remix-ide.readthedocs.io/en/latest/unittesting.html#customization
-    /// #sender: account-1
-    /// #value: 100
-    function checkSenderAndValue() public payable {
-        // account index varies 0-9, value is in wei
-        Assert.equal(msg.sender, TestsAccounts.getAccount(1), "Invalid sender");
-        Assert.equal(msg.value, 100, "Invalid value");
-    }
-
-
-    /// #sender: account-1
-    /// #value: 10000
-    function checkBuyTokens() public payable {
+    function beforeEach() public {
         testVote = new QuadraticVoting(1000, 10);
-        addParticipant();
-        Assert.equal(msg.value, 0, "kein Plan");
+    }
+
+    // #sender: account-1
+    // #value: 10000
+    // function checkBuyTokens() public payable {
+    //     testVote = new QuadraticVoting(1000, 10);
+    //     addParticipant();
+    //     Assert.equal(msg.value, 0, "kein Plan");
+    // }
+
+    // #sender: account-1
+    // #value: 10000
+    function checkOpenVoting() public {
+        testVote = new QuadraticVoting(1000, 10);
+        testVote.openVoting();
+        try testVote.openVoting() {
+            Assert.ok(false, "Call should fail.");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "Voting is already open.", "");
+        } 
+    }
+
+    // #sender: account-1
+    // #value: 10000
+    function checkAddParticipant() public {
+        testVote = new QuadraticVoting(1000, 10);
+        testVote.addParticipant();
+        try testVote.addParticipant() {
+            Assert.ok(false, "Call should fail.");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "Participant already registered.", "");
+        } 
     }
 }
