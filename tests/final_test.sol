@@ -118,4 +118,17 @@ contract testSuite {
 
         testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(this));
     }
+
+    function checkCancelProposal() public {
+        testVote.openVoting();
+        testVote.addParticipant();
+        uint proposal_id = testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(this));
+
+        testVote.cancelProposal(proposal_id);
+        try testVote.cancelProposal(proposal_id) {
+            Assert.ok(false, "Call should fail.");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "Proposal has already been cancelled.", "");
+        } 
+    }
 }

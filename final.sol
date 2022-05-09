@@ -16,7 +16,7 @@ contract QuadraticVoting{
     uint private maxUsedTokens;
     uint private total_budget;
     // Proposal -> User -> votes
-    mapping(address => uint)[] votes_per_user_per_proposal;
+    mapping(uint => mapping(address => uint)) votes_per_user_per_proposal;
     address[][] voters_of_proposals;
 
 
@@ -40,6 +40,7 @@ contract QuadraticVoting{
         tokenLogic = new VotingToken("Mark", "RM", maxUsedTokens_);
         is_open = false;
         total_participants = 0;
+        voters_of_proposals = new address[][](0);
     }
 
     modifier onlyOwner {
@@ -80,6 +81,7 @@ contract QuadraticVoting{
         require(isContract(executable_proposal_address), "The address received is not a valid contract address");
 
         proposals.push(Proposal(msg.sender, title, description, 0, budget, executable_proposal_address, false, false));
+        voters_of_proposals.push(new address[](0));
         return proposals.length - 1;
     }
 
@@ -101,7 +103,7 @@ contract QuadraticVoting{
         
         address[] storage voters_of_proposal = voters_of_proposals[proposal_id];
 
-        for(uint i = 0; i < voters_of_proposals.length; i++){
+        for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
             votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]] = 0;
             tokens_of_voters[voters_of_proposal[i]] += votes**2;
