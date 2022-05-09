@@ -76,7 +76,7 @@ contract QuadraticVoting{
     
     function addProposal(string calldata title, string calldata description, uint budget, address executable_proposal_address) external votingOpen participantRegistered returns (uint proposal_id  ){
         require(bytes(title).length > 0, "Title can't be empty");
-        require(bytes(description).length > 0, "Title can't be empty");
+        require(bytes(description).length > 0, "Description can't be empty");
         require(isContract(executable_proposal_address), "The address received is not a valid contract address");
 
         proposals.push(Proposal(msg.sender, title, description, 0, budget, executable_proposal_address, false, false));
