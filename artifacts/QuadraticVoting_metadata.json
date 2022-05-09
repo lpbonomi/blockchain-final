@@ -1,0 +1,299 @@
+{
+	"compiler": {
+		"version": "0.8.13+commit.abaa5c0e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "tokenPrice_",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "maxUsedTokens_",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "payable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [],
+				"name": "addParticipant",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "title",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "budget",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "executable_proposal_address",
+						"type": "address"
+					}
+				],
+				"name": "addProposal",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "proposal_id",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "buyTokens",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "proposal_id",
+						"type": "uint256"
+					}
+				],
+				"name": "cancelProposal",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "closeVoting",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getApprovedProposals",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "approved_proposals",
+						"type": "uint256[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getERC20Voting",
+				"outputs": [
+					{
+						"internalType": "contract VotingToken",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getPendingProposals",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "pending_proposals",
+						"type": "uint256[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "proposal_id",
+						"type": "uint256"
+					}
+				],
+				"name": "getSignalingProposals",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "title",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "budget",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getSignalingProposals",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "signaling_proposals",
+						"type": "uint256[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "openVoting",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "nrTokens",
+						"type": "uint256"
+					}
+				],
+				"name": "sellTokens",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "proposalId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nrVotes",
+						"type": "uint256"
+					}
+				],
+				"name": "stake",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount_of_votes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "proposal_id",
+						"type": "uint256"
+					}
+				],
+				"name": "withdrawFromProposal",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"blockchain-final/final.sol": "QuadraticVoting"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"blockchain-final/final.sol": {
+			"keccak256": "0x348572cea78ab532b14c33264832603c5f69e6df3b511d11e74c871e4f58d64b",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://fe08d9025b2202062f8c3f6dcef28124da8e4f9dc24390014e0d77ed11f6aabd",
+				"dweb:/ipfs/QmYfec2SB9fqB7mWqvic75erzt89DPn1rgPXdzQrW1LqgU"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/ERC20.sol": {
+			"keccak256": "0x17b6b6189de509d602776fab3d0924c576ec365e53e712d16bdc57b1538edadb",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7d8b3d9f1484e8ae7443a0a5e46f2faef362813f4fd6e0660d4b64725a16a990",
+				"dweb:/ipfs/QmQVeGDmxWy5A4PfKKpNrrEjFTgwygS7xCTtySSMC7R4M8"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x5736fdfd3c69664af01fbf8734410bb4133672fe0abfafa39574c02d63227c6c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3d4c09d6c75c23a8e253ab3ab50c4243d21efc52acc808ae5b32d92c5032bba1",
+				"dweb:/ipfs/Qmf8FAHdTm3oK9G8zdFm8yMSUQ13hSaENTFpxfM34dPwKA"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+			"keccak256": "0x8de418a5503946cabe331f35fe242d3201a73f67f77aaeb7110acb1f30423aca",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a376d3dda2cb70536c0a45c208b29b34ac560c4cb4f513a42079f96ba47d2dd",
+				"dweb:/ipfs/QmZQg6gn1sUpM8wHzwNvSnihumUCAhxD119MpXeKp8B9s8"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/utils/Context.sol": {
+			"keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92",
+				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
+			]
+		}
+	},
+	"version": 1
+}

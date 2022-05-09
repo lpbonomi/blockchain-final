@@ -14,10 +14,15 @@ import "../final.sol";
 // File name has to end with '_test.sol', this file can contain more than one testSuite contracts
 contract testSuite {
 
+    QuadraticVoting testVote;
+    address acc0 = TestsAccounts.getAccount(0); //owner by default
+    address acc1 = TestsAccounts.getAccount(1);
+    address acc2 = TestsAccounts.getAccount(2);
+    address acc3 = TestsAccounts.getAccount(3);
+    address recipient = TestsAccounts.getAccount(4); //recipient
     /// 'beforeAll' runs before all other tests
     /// More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'
-    function beforeAll() public {
-        // <instantiate contract>
+    function beforeAll() public {        
         Assert.equal(uint(1), uint(1), "1 should be equal to 1");
     }
 
@@ -45,5 +50,13 @@ contract testSuite {
         Assert.equal(msg.sender, TestsAccounts.getAccount(1), "Invalid sender");
         Assert.equal(msg.value, 100, "Invalid value");
     }
+
+
+    /// #sender: account-1
+    /// #value: 10000
+    function checkBuyTokens() public payable {
+        testVote = new QuadraticVoting(1000, 10);
+        addParticipant();
+        Assert.equal(msg.value, 0, "kein Plan");
+    }
 }
-    

@@ -32,12 +32,12 @@ contract QuadraticVoting{
     }
 
 
-    constructor(uint tokenPrice_, uint maxUsedTokens_, uint tokenCap) payable{
+    constructor(uint tokenPrice_, uint maxUsedTokens_) payable{
         owner = msg.sender;
         tokenPrice = tokenPrice_;
         maxUsedTokens = maxUsedTokens_;
         total_budget = msg.value;
-        tokenLogic = new VotingToken("Mark", "RM", tokenCap);
+        tokenLogic = new VotingToken("Mark", "RM", maxUsedTokens_);
         is_open = false;
         total_participants = 0;
     }
@@ -69,7 +69,6 @@ contract QuadraticVoting{
 
     function addParticipant() external payable {
         require(registeredParticipants[msg.sender] == false, "Participant already registered.");
-        buyTokens();
         registeredParticipants[msg.sender] = true;
         total_participants++;
     }
@@ -316,8 +315,7 @@ interface IExecutableProposal
 }
 
 contract testContract is IExecutableProposal
-{
-    
+{ 
     event Pay(address sender, uint proposalId, uint value);
     
     function executeProposal(uint proposalId) override external payable

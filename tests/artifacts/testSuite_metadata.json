@@ -1,0 +1,150 @@
+{
+	"compiler": {
+		"version": "0.8.13+commit.abaa5c0e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "beforeAll",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkFailure",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkSenderAndValue",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkSuccess",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkSuccess2",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"beforeAll()": {
+					"notice": "'beforeAll' runs before all other tests More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'"
+				},
+				"checkSenderAndValue()": {
+					"notice": "Custom Transaction Context: https://remix-ide.readthedocs.io/en/latest/unittesting.html#customization #sender: account-1 #value: 100"
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"blockchain-final/tests/final_test.sol": "testSuite"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"blockchain-final/final.sol": {
+			"keccak256": "0x56cab0cf1d6f7ac24dcdf613680196d6fecaca6aedb7053787b5ccda2b3f8592",
+			"license": "UNLICENSED",
+			"urls": [
+				"bzz-raw://d1fc90a102e68151f55cb9a9029e19472d60033370b05e0ba34cd41231a09ba4",
+				"dweb:/ipfs/QmUngUtHTV9ncT1wiZAJSvYEh5SeoF6iQwbbFXerSLksod"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/ERC20.sol": {
+			"keccak256": "0x17b6b6189de509d602776fab3d0924c576ec365e53e712d16bdc57b1538edadb",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7d8b3d9f1484e8ae7443a0a5e46f2faef362813f4fd6e0660d4b64725a16a990",
+				"dweb:/ipfs/QmQVeGDmxWy5A4PfKKpNrrEjFTgwygS7xCTtySSMC7R4M8"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x5736fdfd3c69664af01fbf8734410bb4133672fe0abfafa39574c02d63227c6c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3d4c09d6c75c23a8e253ab3ab50c4243d21efc52acc808ae5b32d92c5032bba1",
+				"dweb:/ipfs/Qmf8FAHdTm3oK9G8zdFm8yMSUQ13hSaENTFpxfM34dPwKA"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+			"keccak256": "0x8de418a5503946cabe331f35fe242d3201a73f67f77aaeb7110acb1f30423aca",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a376d3dda2cb70536c0a45c208b29b34ac560c4cb4f513a42079f96ba47d2dd",
+				"dweb:/ipfs/QmZQg6gn1sUpM8wHzwNvSnihumUCAhxD119MpXeKp8B9s8"
+			]
+		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/utils/Context.sol": {
+			"keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92",
+				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
+			]
+		},
+		"blockchain-final/tests/final_test.sol": {
+			"keccak256": "0x48f08126800272e8ff73afeca3918db2336c716aaeaaa047597119535d036b98",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://2e479d47ea3d0f3351ca745879d5d4d71a8747f00daa1bf39a7e0bc7bb614f76",
+				"dweb:/ipfs/QmVCHsqMfPNNynHhxUpsEWMg4FCv5cPBvsUznhH3Vhx9Zq"
+			]
+		},
+		"remix_accounts.sol": {
+			"keccak256": "0x198a94b8e0342a81c31fda8ba387964155802ef81807e01e83e2320682dce327",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://db7d9939731e6fe2030d53b80f57ce2c1f8044209c1c67e634e81160227d3019",
+				"dweb:/ipfs/QmRLYhZ2Y6bfh83QSD2hCnhVFejevzh77zUTohCCC8yCtu"
+			]
+		},
+		"remix_tests.sol": {
+			"keccak256": "0xe2783cdc204cba8c72494119339f1d90f9022b15d6c718c668b7f097d8e29787",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://bb6a22e64c7f16bcaab63b1c1a1b269d5be8a6d37bdd9dec1718477ab916b18e",
+				"dweb:/ipfs/QmdkW1tT5iadBvaHMCoskhDGZKnfdg8o1D9CcoQYtdJet7"
+			]
+		}
+	},
+	"version": 1
+}
