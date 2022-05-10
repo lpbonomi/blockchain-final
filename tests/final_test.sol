@@ -140,11 +140,24 @@ contract testSuite {
         Assert.equal(testVote.getApprovedProposals().length, 0, "The number of proposals should be 0.");
 
         testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(this));
+        testVote.addProposal("Proposal Title", "This is a test signaling proposal", 0, address(this));
 
         Assert.equal(testVote.getPendingProposals().length, 1, "The number of proposals should be 1.");
+        Assert.equal(testVote.getSignalingProposals().length, 1, "The number of proposals should be 1.");
     }
 
-    
-    
+    function checkGetProposalInfo() public {
+        testVote.openVoting();
+        testVote.addParticipant();
+
+        uint proposal_id = testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(this));
+
+        (string memory title, string memory description, uint budget, address executable_proposal_address) = testVote.getProposalInfo(proposal_id);
+
+        Assert.equal(title, "Proposal Title", "");
+        Assert.equal(description, "This is a test proposal", "");
+        Assert.equal(budget, 1000, "");
+        Assert.equal(executable_proposal_address, address(this), "");
+    }
 
 }

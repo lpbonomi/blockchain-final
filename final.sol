@@ -224,6 +224,12 @@ contract QuadraticVoting{
         _checkAndExecuteProposal(proposalId);  
     }
 
+    function getProposalInfo(uint proposal_id) public view returns(string memory, string memory, uint, address){
+        Proposal storage proposal = proposals[proposal_id];
+        
+        return (proposal.title, proposal.description, proposal.budget, proposal.executable_proposal_address);
+    }
+
     function withdrawFromProposal(uint amount_of_votes, uint proposal_id) external{
         Proposal storage proposal = proposals[proposal_id];
         require(!proposal.is_approved, "The proposal has already been approved");
