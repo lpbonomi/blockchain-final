@@ -29,7 +29,7 @@ contract testSuite {
     
     // #sender: account-1
     // #value: 0
-    function checkBuyTooLittleTokens() public payable {
+    function checkBuyTooFewTokens() public payable {
         testVote.addParticipant();
         try testVote.buyTokens() {
             Assert.ok(false, "Call should fail");
@@ -52,11 +52,54 @@ contract testSuite {
     /// #value: 3001
     function checkBuyFractionalTokens() public payable {
         testVote.addParticipant();
-        try testVote.buyTokens() {
+        try testVote.buyTokens{value: 3001}() {
             Assert.ok(false, "Call should fail");
         } catch Error(string memory reason) {
             Assert.equal(reason, "Watch the token price, only whole tokens can be bought!", "");
         }  
+    }
+
+    /// #sender: account-1
+    /// #value: 11000
+    function checkBuyTooManyTokens() public payable {
+        testVote.addParticipant();
+        try testVote.buyTokens{value: 11000}() {
+            Assert.ok(false, "Call should fail");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "Not enough tokens available!", "");
+        }  
+    }
+    
+    /*
+    /// #sender: account-1
+    /// #value: 10000
+    function buyCorrectTokens() public payable {
+        testVote.addParticipant();
+        testVote.buyTokens{value: 5000}();
+        Assert.equal(tokens_of_voters[msg.sender], 5, "");
+    }
+    */
+
+    // #sender: account-1
+    // #value: 10000
+    //function sellTooManyTokens() public payable {
+        //testVote.addParticipant;
+        //testVote.buyTokens{gas: 100000, value: 1000}();
+        /*try testVote.sellTokens(2) {
+            Assert.ok(false, "Call should fail.");
+        } catch Error(string memory reason) {
+            Assert.equal(reason, "You don't own so many tokens!", "");
+        }*/
+    //}
+
+    // #sender: account-1
+    // #value: 10000
+    function sellCorrectTokens() public {
+        testVote.addParticipant;
+        testVote.buyTokens{value: 1000}();
+        Assert.equal(tokens_of_voters[msg.sender], 1, "");
+        testVote.sellTokens(1);
+        Assert.equal(tokens_of_voters[msg.sender], 0, "");
     }
 
     // #sender: account-1
