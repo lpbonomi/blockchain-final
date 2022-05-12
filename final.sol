@@ -3,8 +3,12 @@
 pragma solidity ^0.8.13;
 
 import "./openzeppelin-contracts-master/contracts/token/ERC20/ERC20.sol";
+import "./openzeppelin-contracts-master/contracts/utils/math/SafeMath.sol";
 
 contract QuadraticVoting{
+
+    using SafeMath for uint256;
+
     address owner;
     bool is_open;
     mapping (address => uint) tokens_of_voters;
@@ -18,6 +22,9 @@ contract QuadraticVoting{
     // Proposal -> User -> votes
     mapping(uint => mapping(address => uint)) votes_per_user_per_proposal;
     address[][] voters_of_proposals;
+    uint close_voting_i;
+    uint close_voting_j;
+    uint gas_per_iteration;
 
 
     struct Proposal {
@@ -41,6 +48,9 @@ contract QuadraticVoting{
         is_open = false;
         total_participants = 0;
         voters_of_proposals = new address[][](0);
+        close_voting_i = 0;
+        close_voting_j = 0;
+        gas_per_iteration = 0;
     }
 
     modifier onlyOwner {
@@ -105,19 +115,20 @@ contract QuadraticVoting{
 
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
-            votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]] = 0;
             tokens_of_voters[voters_of_proposal[i]] += votes**2;
+            votes = 0;
         }
     }
 
     function buyTokens() participantRegistered public payable
     {
         require(msg.value>0, "You have to buy at least one token!");
-        require((msg.value % tokenPrice)==0, "Watch the token price, only whole tokens can be bought!");
-        require(msg.value/tokenPrice <= maxUsedTokens, "Not enough tokens available!");
-        tokenLogic.mint(msg.sender, msg.value/tokenPrice);
-        tokens_of_voters[msg.sender] += msg.value/tokenPrice;
-        maxUsedTokens -= msg.value/tokenPrice;
+        require((msg.value.mod(tokenPrice))==0, "Watch the token price, only whole tokens can be bought!");
+        uint tokens = msg.value.div(tokenPrice);
+        require(tokens <= maxUsedTokens, "Not enough tokens available!");
+        tokenLogic.mint(msg.sender, tokens);
+        tokens_of_voters[msg.sender] += tokens;
+        maxUsedTokens -= tokens;
     }
 
     function sellTokens(uint nrTokens) participantRegistered public payable
@@ -125,7 +136,7 @@ contract QuadraticVoting{
         require(tokens_of_voters[msg.sender] >= nrTokens, "You don't own so many tokens!"); 
         tokenLogic.burn(msg.sender, nrTokens);
         address payable addr = payable(msg.sender);
-        addr.transfer(nrTokens*tokenPrice);       
+        addr.transfer(nrTokens.mul(tokenPrice));       
     }
 
     function getERC20Voting() external view returns(VotingToken)
@@ -133,7 +144,6 @@ contract QuadraticVoting{
         return tokenLogic;
     }
 
-    // TODO ver si se puede hacer de una manera mejor
     function getPendingProposals() external view votingOpen returns (uint[] memory  pending_proposals){
         uint number_of_pending_proposals = 0;
         for(uint i = 0; i < proposals.length; i++){
@@ -200,11 +210,6 @@ contract QuadraticVoting{
         return signaling_proposals;
     }
 
-    function getSignalingProposals(uint proposal_id) external view votingOpen returns(string memory title, string memory description, uint budget){
-        Proposal storage proposal = proposals[proposal_id];
-        return (proposal.title, proposal.description, proposal.budget);
-    }
-
     function stake(uint proposalId, uint nrVotes) public participantRegistered votingOpen{
         Proposal storage proposal = proposals[proposalId];
         uint previous_votes = votes_per_user_per_proposal[proposalId][msg.sender];
@@ -267,20 +272,38 @@ contract QuadraticVoting{
     }
 
     function closeVoting() external onlyOwner{
+        uint gas_per_iter = gas_per_iteration;
+        bool first_time = gas_per_iter == 0;
+
         is_open = false;
-        for(uint i = 0 ; i < proposals.length; i++)
+        for(uint i = close_voting_i; i < proposals.length; i++)
         {
             if(proposals[i].is_approved == false) //if the proposal is still not approved
             {
-               for(uint j=0; j<voters_of_proposals[i].length; j++)
+                if(first_time){
+                    gas_per_iter = gasleft();
+                }
+               for(uint j= close_voting_j; j<voters_of_proposals[i].length; j++)
                 {
+                    if(!first_time && (gasleft() < (2*gas_per_iter)))
+                    {
+                        close_voting_i = i;
+                        close_voting_j = j;
+                        return;          
+                    }
+
                     if(votes_per_user_per_proposal[i][voters_of_proposals[i][j]]>0) //check if the participant voted in this proposal
                     {
                         uint aux = votes_per_user_per_proposal[i][voters_of_proposals[i][j]];
                         votes_per_user_per_proposal[i][voters_of_proposals[i][j]] = 0; //set the number of tokens to 0 
                         address payable addr = payable(voters_of_proposals[i][j]); //convert the address to payable to be able to do the transfer
-                        addr.transfer(aux**2*tokenPrice); //send him the value in money of his tokens
+                        addr.transfer((aux**2)*tokenPrice); //send him the value in money of his tokens
                         delete proposals[i];
+                    }
+                    if(first_time){
+                        first_time = false;
+                        gas_per_iter -= gasleft();
+                        gas_per_iteration = gas_per_iter;
                     }
                 }
             }
