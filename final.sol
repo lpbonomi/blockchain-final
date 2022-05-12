@@ -48,9 +48,6 @@ contract QuadraticVoting{
         is_open = false;
         total_participants = 0;
         voters_of_proposals = new address[][](0);
-        close_voting_i = 0;
-        close_voting_j = 0;
-        gas_per_iteration = 0;
     }
 
     modifier onlyOwner {
@@ -77,6 +74,9 @@ contract QuadraticVoting{
         require(!is_open, "Voting is already open.");
         is_open = true;
         total_budget = msg.value;
+        close_voting_i = 0;
+        close_voting_j = 0;
+        gas_per_iteration = 0;
     }
 
     function addParticipant() external payable {
@@ -285,7 +285,7 @@ contract QuadraticVoting{
                 }
                for(uint j= close_voting_j; j<voters_of_proposals[i].length; j++)
                 {
-                    if(!first_time && (gasleft() < (2*gas_per_iter)))
+                    if(!first_time && (gasleft() < (3*gas_per_iter)))
                     {
                         close_voting_i = i;
                         close_voting_j = j;
@@ -298,7 +298,6 @@ contract QuadraticVoting{
                         votes_per_user_per_proposal[i][voters_of_proposals[i][j]] = 0; //set the number of tokens to 0 
                         address payable addr = payable(voters_of_proposals[i][j]); //convert the address to payable to be able to do the transfer
                         addr.transfer((aux**2)*tokenPrice); //send him the value in money of his tokens
-                        delete proposals[i];
                     }
                     if(first_time){
                         first_time = false;
@@ -306,6 +305,7 @@ contract QuadraticVoting{
                         gas_per_iteration = gas_per_iter;
                     }
                 }
+                delete proposals[i];
             }
         }
     }
