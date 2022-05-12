@@ -13,7 +13,7 @@ contract QuadraticVoting{
     bool is_open;
     mapping (address => uint) tokens_of_voters;
     Proposal[] proposals;
-    VotingToken private tokenLogic;
+    VotingToken public tokenLogic;
     mapping (address => bool) registeredParticipants; 
     uint total_participants;
     uint private immutable tokenPrice;
@@ -251,12 +251,16 @@ contract QuadraticVoting{
     
     function _checkAndExecuteProposal(uint proposal_id) internal {
         Proposal storage proposal = proposals[proposal_id];
-        require(proposal.budget <= total_budget + (proposal.votes * tokenPrice), "Budget + money collected is not enough for proposal.");
+        if(proposal.budget > total_budget + (proposal.votes * tokenPrice)){
+            return; // Doesn't meet required condition
+        }
 
         // TODO question: numProposals includes cancelled proposals?
         // We multiply by 10 and by total_budget to avoid decimals
         uint threshold = (2 + (10 * proposal.budget)) * total_participants + (proposals.length * 10 * total_budget);
-        require(proposal.votes * 10 * total_budget > threshold, "Votes don't exceed the threshold");
+        if(proposal.votes * 10 * total_budget <= threshold){
+            return; // Doesn't meet required condition
+        }
 
         IExecutableProposal executable_proposal = IExecutableProposal(proposal.executable_proposal_address);
         executable_proposal.executeProposal{value: proposal.budget, gas: 100000}(proposal_id);
