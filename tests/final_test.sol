@@ -25,7 +25,27 @@ contract testSuite {
         testVote = new QuadraticVoting(1000, 10);
     }
 
-
+    // #sender: account-1
+    // #value: 10000
+    function completeTest() public payable{
+        testVote.addParticipant();
+        testVote.buyTokens{value: 2000}();
+        testVote.openVoting();
+        testVote.addProposal();
+        testVote.buyTokens();
+        testVote.addProposal();
+        testVote.getPendingProposals();
+        testVote.getProposalInfo();
+        testVote.stake();
+        testVote.withdrawFromProposal();
+        testVote.stake();
+        testVote.getSignalingProposals();
+        testVote.sellTokens();
+        testVote.cancelProposal();
+        testVote.getApprovedProposals();
+        testVote.closeVoting();
+        Assert.equal();
+    }
     
     // #sender: account-1
     // #value: 0
