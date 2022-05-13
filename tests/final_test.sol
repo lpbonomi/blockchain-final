@@ -184,12 +184,11 @@ contract testSuite {
     /// #value: 100000
     function checkCloseVoting() public payable {
         testVote.openVoting{value: 10000}();
-        testVote.addParticipant();
+        testVote.addParticipant{value:1000}();
 
         TestContract TC = new TestContract();
         uint proposal_id = testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(TC));
 
-        testVote.buyTokens{value:1000}();
         testVote.tokenLogic().approve(address(testVote), uint(100));
         testVote.stake(proposal_id, 10);
         testVote.closeVoting();

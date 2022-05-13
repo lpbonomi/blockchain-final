@@ -82,6 +82,7 @@ contract QuadraticVoting{
         require(registeredParticipants[msg.sender] == false, "Participant already registered.");
         registeredParticipants[msg.sender] = true;
         total_participants++;
+        buyTokens();
     }
     
     function addProposal(string calldata title, string calldata description, uint budget, address executable_proposal_address) external votingOpen participantRegistered returns (uint proposal_id  ){
@@ -225,7 +226,10 @@ contract QuadraticVoting{
         if(previous_votes == 0){
             voters_of_proposals[proposalId].push(payable(msg.sender));
         }
-        _checkAndExecuteProposal(proposalId);  
+
+        if(proposal.budget != 0){
+            _checkAndExecuteProposal(proposalId);  
+        }
     }
 
     function getProposalInfo(uint proposal_id) public view returns(string memory, string memory, uint, address){
@@ -281,12 +285,16 @@ contract QuadraticVoting{
         is_open = false;
         for(uint i = close_voting_i; i < proposals.length; i++)
         {
-            if(proposals[i].is_approved == false) //if the proposal is still not approved
+            Proposal storage proposal = proposals[i];
+
+            if(proposal.is_approved == false) //if the proposal is still not approved
             {
                 if(first_time){
                     gas_per_iter = gasleft();
                 }
-               for(uint j= close_voting_j; j<voters_of_proposals[i].length; j++)
+                address payable[] storage voters_of_proposal = voters_of_proposals[i];
+                mapping(address => uint256) storage votes_per_user = votes_per_user_per_proposal[i];
+               for(uint j= close_voting_j; j<voters_of_proposal.length; j++)
                 {
                     if(!first_time && (gasleft() < (3*gas_per_iter)))
                     {
@@ -295,11 +303,11 @@ contract QuadraticVoting{
                         return;          
                     }
 
-                    if(votes_per_user_per_proposal[i][voters_of_proposals[i][j]]>0) //check if the participant voted in this proposal
+                    if(votes_per_user[voters_of_proposal[j]]>0) //check if the participant voted in this proposal
                     {
-                        uint aux = votes_per_user_per_proposal[i][voters_of_proposals[i][j]];
-                        votes_per_user_per_proposal[i][voters_of_proposals[i][j]] = 0; //set the number of tokens to 0 
-                        address payable addr = payable(voters_of_proposals[i][j]); //convert the address to payable to be able to do the transfer
+                        uint aux = votes_per_user[voters_of_proposal[j]];
+                        votes_per_user[voters_of_proposal[j]] = 0; //set the number of tokens to 0 
+                        address payable addr = payable(voters_of_proposal[j]); //convert the address to payable to be able to do the transfer
                         addr.transfer((aux**2)*tokenPrice); //send him the value in money of his tokens
                     }
                     if(first_time){
@@ -308,8 +316,12 @@ contract QuadraticVoting{
                         gas_per_iteration = gas_per_iter;
                     }
                 }
-                delete proposals[i];
+                if(proposal.budget == 0){
+                    IExecutableProposal executable_proposal = IExecutableProposal(proposal.executable_proposal_address);
+                    executable_proposal.executeProposal{value: proposal.budget, gas: 100000}(i);
+                }
             }
+            delete proposals[i];
         }
     }
 
