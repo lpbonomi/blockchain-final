@@ -276,7 +276,7 @@ contract QuadraticVoting{
             wei_for_owner += (votes**2)*tokenPrice;
         }
 
-        total_budget += wei_for_owner - proposal.budget;
+        total_budget = total_budget + wei_for_owner - proposal.budget;
     }
 
     function closeVoting() external onlyOwner{
