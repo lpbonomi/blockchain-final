@@ -21,7 +21,7 @@ contract QuadraticVoting{
     uint private total_budget;
     // Proposal -> User -> votes
     mapping(uint => mapping(address => uint)) votes_per_user_per_proposal;
-    address[][] voters_of_proposals;
+    address payable[][] voters_of_proposals;
     uint close_voting_i;
     uint close_voting_j;
     uint gas_per_iteration;
@@ -39,7 +39,7 @@ contract QuadraticVoting{
     }
 
 
-    constructor(uint tokenPrice_, uint maxUsedTokens_) payable{
+    constructor(uint tokenPrice_, uint maxUsedTokens_) payable {
         owner = msg.sender;
         tokenPrice = tokenPrice_;
         maxUsedTokens = maxUsedTokens_;
@@ -47,7 +47,7 @@ contract QuadraticVoting{
         tokenLogic = new VotingToken("Mark", "RM", maxUsedTokens_);
         is_open = false;
         total_participants = 0;
-        voters_of_proposals = new address[][](0);
+        voters_of_proposals = new address payable[][](0);
     }
 
     modifier onlyOwner {
@@ -91,7 +91,7 @@ contract QuadraticVoting{
         require(isContract(executable_proposal_address), "The address received is not a valid contract address");
 
         proposals.push(Proposal(msg.sender, title, description, 0, budget, executable_proposal_address, false, false));
-        voters_of_proposals.push(new address[](0));
+        voters_of_proposals.push(new address payable[](0));
         return proposals.length - 1;
     }
 
@@ -111,7 +111,7 @@ contract QuadraticVoting{
 
         proposal.is_cancelled = true;
         
-        address[] storage voters_of_proposal = voters_of_proposals[proposal_id];
+        address payable[] storage voters_of_proposal = voters_of_proposals[proposal_id];
 
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
@@ -215,7 +215,7 @@ contract QuadraticVoting{
         uint previous_votes = votes_per_user_per_proposal[proposalId][msg.sender];
         uint nrTokens = (previous_votes + nrVotes)**2 - previous_votes;
 
-        require(tokens_of_voters[msg.sender]>=nrTokens, "Not enough tokens!");
+        require(tokens_of_voters[msg.sender]>=nrTokens, "Not enough tokens!");    
         require(tokenLogic.allowance(msg.sender, address(this))>=nrTokens, "Use of tokens needs allowance!");
         tokenLogic.transferFrom(msg.sender, address(this), nrTokens);
         tokens_of_voters[msg.sender] -= nrTokens;
@@ -224,7 +224,7 @@ contract QuadraticVoting{
         proposal.votes += nrVotes;
 
         if(previous_votes == 0){
-            voters_of_proposals[proposalId].push(msg.sender);
+            voters_of_proposals[proposalId].push(payable(msg.sender));
         }
         _checkAndExecuteProposal(proposalId);  
     }
@@ -267,7 +267,7 @@ contract QuadraticVoting{
 
         proposal.is_approved = true;
 
-        address[] storage voters_of_proposal = voters_of_proposals[proposal_id];
+        address payable[] storage voters_of_proposal = voters_of_proposals[proposal_id];
         
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
