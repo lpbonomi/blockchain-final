@@ -22,6 +22,8 @@ contract QuadraticVoting{
     // Proposal -> User -> votes
     mapping(uint => mapping(address => uint)) votes_per_user_per_proposal;
     address payable[][] voters_of_proposals;
+
+    // Vars for the resumable closeVoting()
     uint close_voting_i;
     uint close_voting_j;
     uint gas_per_iteration;
@@ -73,6 +75,8 @@ contract QuadraticVoting{
         require(!is_open, "Voting is already open.");
         is_open = true;
         total_budget = msg.value;
+
+        // Initializing resumable closeVoting() vars
         close_voting_i = 0;
         close_voting_j = 0;
         gas_per_iteration = 0;
@@ -113,6 +117,7 @@ contract QuadraticVoting{
         
         address payable[] storage voters_of_proposal = voters_of_proposals[proposal_id];
 
+        // Returns tokens to voters
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
             tokens_of_voters[voters_of_proposal[i]] += votes**2;
@@ -145,6 +150,8 @@ contract QuadraticVoting{
     }
 
     function getPendingProposals() external view votingOpen returns (uint[] memory  pending_proposals){
+
+        // Counts number of pending proposals
         uint number_of_pending_proposals = 0;
         for(uint i = 0; i < proposals.length; i++){
             Proposal storage proposal = proposals[i];
@@ -153,6 +160,7 @@ contract QuadraticVoting{
             }
         }
 
+        // Gets pending proposals
         pending_proposals = new uint[](number_of_pending_proposals);
         uint j = 0;
         for(uint i = 0; i < number_of_pending_proposals; j++){
@@ -167,6 +175,8 @@ contract QuadraticVoting{
     }
 
     function getApprovedProposals() external view votingOpen returns(uint[] memory approved_proposals){
+
+        // Counts number of approved proposals
         uint number_of_approved_proposals = 0;
         for(uint i = 0; i < proposals.length; i++){
             Proposal storage proposal = proposals[i];
@@ -175,6 +185,8 @@ contract QuadraticVoting{
             }
         }
 
+
+        // Gets approved proposals
         approved_proposals = new uint[](number_of_approved_proposals);
         uint j = 0;
         for(uint i = 0; i < number_of_approved_proposals; j++){
@@ -189,6 +201,8 @@ contract QuadraticVoting{
     }
 
     function getSignalingProposals() external view votingOpen returns(uint[] memory signaling_proposals){
+
+        // Counts number of signaling proposals
         uint number_of_signaling_proposals = 0;
         for(uint i = 0; i < proposals.length; i++){
             Proposal storage proposal = proposals[i];
@@ -197,6 +211,8 @@ contract QuadraticVoting{
             }
         }
 
+
+        // Gets signaling proposals
         signaling_proposals = new uint[](number_of_signaling_proposals);
         uint j = 0;
         for(uint i = 0; i < number_of_signaling_proposals; j++){
@@ -227,6 +243,8 @@ contract QuadraticVoting{
             voters_of_proposals[proposalId].push(payable(msg.sender));
         }
 
+
+        // Only executes financial proposals
         if(proposal.budget != 0){
             _checkAndExecuteProposal(proposalId);  
         }
@@ -255,13 +273,14 @@ contract QuadraticVoting{
         }
 
         // We multiply by 10 and by total_budget to avoid decimals
-
         uint threshold = (2 + (10 * proposal.budget)) * total_participants + (proposals.length * 10 * total_budget);
         uint total_votes = proposal.votes * 10 * total_budget;
         if(total_votes <= threshold){
             return; // Doesn't meet required condition
         }
 
+
+        // Executes proposal
         IExecutableProposal executable_proposal = IExecutableProposal(proposal.executable_proposal_address);
         executable_proposal.executeProposal{value: proposal.budget, gas: 100000}(proposal_id);
         proposal.is_approved = true;
@@ -270,6 +289,8 @@ contract QuadraticVoting{
         
         uint wei_for_owner = 0;
 
+
+        // Returns remaining wei to owner
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
             tokenLogic.burn(voters_of_proposal[i], votes**2);
@@ -318,6 +339,8 @@ contract QuadraticVoting{
                         gas_per_iteration = gas_per_iter;
                     }
                 }
+
+                // Executes every signaling proposal
                 if(proposal.budget == 0){
                     IExecutableProposal executable_proposal = IExecutableProposal(proposal.executable_proposal_address);
                     executable_proposal.executeProposal{value: proposal.budget, gas: 100000}(i);
