@@ -22,7 +22,7 @@ contract testSuite {
     address recipient = TestsAccounts.getAccount(4);
 
     function beforeEach() public {
-        testVote = new QuadraticVoting(1000, 10);
+        testVote = new QuadraticVoting(1, 10000);
     }
 
     // #sender: account-1
@@ -183,14 +183,15 @@ contract testSuite {
     /// #sender: account-1
     /// #value: 100000
     function checkCloseVoting() public payable {
-        testVote.openVoting();
+        testVote.openVoting{value: 10000}();
         testVote.addParticipant();
 
-        uint proposal_id = testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(this));
+        TestContract TC = new TestContract();
+        uint proposal_id = testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(TC));
 
         testVote.buyTokens{value:1000}();
-        testVote.tokenLogic().approve(address(testVote), uint(1));
-        testVote.stake(proposal_id, 1);
+        testVote.tokenLogic().approve(address(testVote), uint(100));
+        testVote.stake(proposal_id, 10);
         testVote.closeVoting();
     }
 }
