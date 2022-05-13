@@ -7,43 +7,86 @@
 		"abi": [
 			{
 				"inputs": [],
-				"name": "beforeAll",
+				"name": "beforeEach",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "checkFailure",
+				"name": "checkAddParticipant",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "checkSenderAndValue",
+				"name": "checkAddProposal",
 				"outputs": [],
 				"stateMutability": "payable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "checkSuccess",
+				"name": "checkBuyFractionalTokens",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkBuyTokensUnregistered",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkBuyTooLittleTokens",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkCancelProposal",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
 				"inputs": [],
-				"name": "checkSuccess2",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "pure",
+				"name": "checkCloseVoting",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkGetProposalInfo",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkGetProposals",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkOpenVoting",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "completeTest",
+				"outputs": [],
+				"stateMutability": "payable",
 				"type": "function"
 			}
 		],
@@ -55,11 +98,32 @@
 		"userdoc": {
 			"kind": "user",
 			"methods": {
-				"beforeAll()": {
-					"notice": "'beforeAll' runs before all other tests More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'"
+				"checkAddParticipant()": {
+					"notice": "#sender: account-1 #value: 10000"
 				},
-				"checkSenderAndValue()": {
-					"notice": "Custom Transaction Context: https://remix-ide.readthedocs.io/en/latest/unittesting.html#customization #sender: account-1 #value: 100"
+				"checkAddProposal()": {
+					"notice": "#sender: account-1 #value: 10000"
+				},
+				"checkBuyFractionalTokens()": {
+					"notice": "#sender: account-1 #value: 3001"
+				},
+				"checkBuyTooLittleTokens()": {
+					"notice": "#sender: account-1 #value: 10000"
+				},
+				"checkCloseVoting()": {
+					"notice": "#sender: account-1 #value: 100000"
+				},
+				"checkGetProposalInfo()": {
+					"notice": "#sender: account-1 #value: 10000"
+				},
+				"checkGetProposals()": {
+					"notice": "#sender: account-1 #value: 10000"
+				},
+				"checkOpenVoting()": {
+					"notice": "#sender: account-1 #value: 10000"
+				},
+				"completeTest()": {
+					"notice": "#sender: account-1 #value: 1000000"
 				}
 			},
 			"version": 1
@@ -82,11 +146,11 @@
 	},
 	"sources": {
 		"blockchain-final/final.sol": {
-			"keccak256": "0x56cab0cf1d6f7ac24dcdf613680196d6fecaca6aedb7053787b5ccda2b3f8592",
+			"keccak256": "0xbe7ac98c78ed53d045c0d89fe542de781129f965f80ed980cc3d7b9212f62969",
 			"license": "UNLICENSED",
 			"urls": [
-				"bzz-raw://d1fc90a102e68151f55cb9a9029e19472d60033370b05e0ba34cd41231a09ba4",
-				"dweb:/ipfs/QmUngUtHTV9ncT1wiZAJSvYEh5SeoF6iQwbbFXerSLksod"
+				"bzz-raw://be37f9851ac7061d02b8473da714a1845aab013ba3a57db11217d5aa5d175724",
+				"dweb:/ipfs/QmWfVNWJfPvJDHpRjmMgYGMvZsLesLhCeyoFjnv5XXdK3g"
 			]
 		},
 		"blockchain-final/openzeppelin-contracts-master/contracts/token/ERC20/ERC20.sol": {
@@ -121,12 +185,20 @@
 				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
 			]
 		},
+		"blockchain-final/openzeppelin-contracts-master/contracts/utils/math/SafeMath.sol": {
+			"keccak256": "0x80a62a632fb210251e8a7632c66d8624fd1c2e60b75b3e08c8b04803abec336f",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0163070ead773cf28c76b7d88abb8ecf1c0a2cebda62cc44ca91f60faae361d6",
+				"dweb:/ipfs/QmfVwE4pVia7L7LMbSkQRUWzmX6f4XpdagrrXh7or2qhyd"
+			]
+		},
 		"blockchain-final/tests/final_test.sol": {
-			"keccak256": "0x48f08126800272e8ff73afeca3918db2336c716aaeaaa047597119535d036b98",
+			"keccak256": "0x6f34d7d3c3050e0afd3825bb82dfacd6a9ff0c17db5c509c19004dfb341b6f30",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://2e479d47ea3d0f3351ca745879d5d4d71a8747f00daa1bf39a7e0bc7bb614f76",
-				"dweb:/ipfs/QmVCHsqMfPNNynHhxUpsEWMg4FCv5cPBvsUznhH3Vhx9Zq"
+				"bzz-raw://e960f1f8e2e037234406f8ae2bec0765d9f7153bad54ebacf21c2d9b88ba4bcf",
+				"dweb:/ipfs/QmSYXbrvZGCgt3kByRfnNLqYwC7rD4jGWiWLjJGmiHNKNW"
 			]
 		},
 		"remix_accounts.sol": {

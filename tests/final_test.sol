@@ -25,26 +25,19 @@ contract testSuite {
         testVote = new QuadraticVoting(10, 10000);
     }
 
-    // #sender: account-1
-    // #value: 10000
+    /// #sender: account-1
+    /// #value: 1000000
     function completeTest() public payable{
-        testVote.addParticipant();
-        testVote.buyTokens{value: 2000}();
-        testVote.openVoting();
-        testVote.addProposal();
-        testVote.buyTokens();
-        testVote.addProposal();
+        testVote.openVoting{value: 10000}();
+        testVote.addParticipant{value:10000}();
+        TestContract TC = new TestContract();
+        uint proposal_id = testVote.addProposal("Proposal Title", "This is a test proposal", 1000, address(TC));
+        testVote.buyTokens{value: 1000}();
         testVote.getPendingProposals();
-        testVote.getProposalInfo();
-        testVote.stake();
-        testVote.withdrawFromProposal();
-        testVote.stake();
+        testVote.tokenLogic().approve(address(testVote), uint(100));
+        testVote.stake(proposal_id, 10);
         testVote.getSignalingProposals();
-        testVote.sellTokens();
-        testVote.cancelProposal();
-        testVote.getApprovedProposals();
         testVote.closeVoting();
-        Assert.equal();
     }
     
     /// #sender: account-1

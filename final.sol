@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.13;
 
+// Downloadable from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/
 import "./openzeppelin-contracts-master/contracts/token/ERC20/ERC20.sol";
 import "./openzeppelin-contracts-master/contracts/utils/math/SafeMath.sol";
 
 contract QuadraticVoting{
 
     using SafeMath for uint256;
-
     address payable owner;
     bool is_open;
     mapping (address => uint) tokens_of_voters;
@@ -289,7 +289,7 @@ contract QuadraticVoting{
             Proposal storage proposal = proposals[i];
 
 
-            if(proposal.is_approved == false) //if the proposal is still not approved
+            if(proposal.is_approved == false)
             {
                 if(first_time){
                     gas_per_iter = gasleft();
@@ -305,12 +305,12 @@ contract QuadraticVoting{
                         return;          
                     }
 
-                    if(votes_per_user[voters_of_proposal[j]]>0) //check if the participant voted in this proposal
+                    if(votes_per_user[voters_of_proposal[j]]>0)
                     {
                         uint aux = votes_per_user[voters_of_proposal[j]];
-                        votes_per_user[voters_of_proposal[j]] = 0; //set the number of tokens to 0 
-                        address payable addr = payable(voters_of_proposal[j]); //convert the address to payable to be able to do the transfer
-                        addr.transfer((aux**2)*tokenPrice); //send him the value in money of his tokens
+                        votes_per_user[voters_of_proposal[j]] = 0;
+                        address payable addr = payable(voters_of_proposal[j]);
+                        addr.transfer((aux**2)*tokenPrice);
                     }
                     if(first_time){
                         first_time = false;
@@ -348,7 +348,7 @@ contract VotingToken is ERC20
     }
     
     function mint(address account, uint256 amount) external  virtual {
-        require(ERC20.totalSupply() + amount <= _cap, "ERC20C: cap exceeded");  //totalSupply of tokens bought already + the new tokens;
+        require(ERC20.totalSupply() + amount <= _cap, "ERC20C: cap exceeded");
         super._mint(account, amount);
     }
     
