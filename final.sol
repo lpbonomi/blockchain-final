@@ -9,7 +9,7 @@ contract QuadraticVoting{
 
     using SafeMath for uint256;
 
-    address owner;
+    address payable owner;
     bool is_open;
     mapping (address => uint) tokens_of_voters;
     Proposal[] proposals;
@@ -40,7 +40,7 @@ contract QuadraticVoting{
 
 
     constructor(uint tokenPrice_, uint maxUsedTokens_) payable {
-        owner = msg.sender;
+        owner = payable(msg.sender);
         tokenPrice = tokenPrice_;
         maxUsedTokens = maxUsedTokens_;
         tokenLogic = new VotingToken("Mark", "RM", maxUsedTokens_);
@@ -247,10 +247,6 @@ contract QuadraticVoting{
         votes_per_user_per_proposal[proposal_id][msg.sender] = amount_of_votes;
         tokens_of_voters[msg.sender] += ((votes**2) - ((votes - amount_of_votes)**2)) ;
     }
-
-// TODO
-// Recuerda que debe actualizarse el presupuesto disponible para propuestas (y no olvides a˜nadir al presupuesto el
-//  importe recibido de los tokens de votos de la propuesta que se acaba de aprobar).
     
     function _checkAndExecuteProposal(uint proposal_id) internal {
         Proposal storage proposal = proposals[proposal_id];
@@ -272,10 +268,15 @@ contract QuadraticVoting{
 
         address payable[] storage voters_of_proposal = voters_of_proposals[proposal_id];
         
+        uint wei_for_owner = 0;
+
         for(uint i = 0; i < voters_of_proposal.length; i++){
             uint votes = votes_per_user_per_proposal[proposal_id][voters_of_proposal[i]];
             tokenLogic.burn(voters_of_proposal[i], votes**2);
+            wei_for_owner += (votes**2)*tokenPrice;
         }
+
+        total_budget += wei_for_owner - proposal.budget;
     }
 
     function closeVoting() external onlyOwner{
@@ -286,6 +287,7 @@ contract QuadraticVoting{
         for(uint i = close_voting_i; i < proposals.length; i++)
         {
             Proposal storage proposal = proposals[i];
+
 
             if(proposal.is_approved == false) //if the proposal is still not approved
             {
